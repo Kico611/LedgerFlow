@@ -1,8 +1,7 @@
 package com.ledgerflow.transaction_service.account;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,5 +18,11 @@ public class AccountController {
     @GetMapping
     public List<Account> getAllAccounts() {
         return accountRepository.findAll();
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Account createAccount(@RequestBody Account account) {
+        return accountRepository.save(account);
     }
 }
