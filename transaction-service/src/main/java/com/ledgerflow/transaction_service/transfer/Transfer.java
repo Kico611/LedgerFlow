@@ -73,4 +73,8 @@ public class Transfer {
     public TransferStatus getStatus() {
         return status;
     }
+
+    public void setStatus(TransferStatus status) {
+        this.status = status;
+    }
 }

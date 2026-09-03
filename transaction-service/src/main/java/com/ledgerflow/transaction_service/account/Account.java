@@ -61,4 +61,13 @@ public class Account {
     public AccountStatus getStatus() {
         return status;
     }
+
+    public void reserve(BigDecimal amount) {
+        this.availableBalance = this.availableBalance.subtract(amount);
+        this.reservedBalance = this.reservedBalance.add(amount);
+    }
+
+    public boolean hasSufficientAvailableBalance(BigDecimal amount) {
+        return availableBalance.compareTo(amount) >= 0;
+    }
 }
