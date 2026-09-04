@@ -132,4 +132,43 @@ public class TransferService {
 
         return transfer;
     }
+
+    @Transactional
+    public void settleTransfer(UUID transferId) {
+
+        Transfer transfer = transferRepository
+                .findById(transferId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Transfer not found"));
+
+        if (transfer.getStatus() == TransferStatus.SETTLED) {
+            return;
+        }
+
+        Reservation reservation = reservationRepository
+                .findByTransferId(transferId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Reservation not found"));
+
+        Account sourceAccount = accountRepository
+                .findByIdForUpdate(transfer.getSourceAccount().getId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Source account not found"));
+
+        Account destinationAccount = accountRepository
+                .findByIdForUpdate(transfer.getDestinationAccount().getId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Destination account not found"));
+
+        sourceAccount.settleReserved(reservation.getAmount());
+
+        destinationAccount.credit(reservation.getAmount());
+
+        reservation.markSettled();
+
+        transfer.setStatus(TransferStatus.SETTLED);
+
+        reservationRepository.save(reservation);
+        transferRepository.save(transfer);
+    }
 }

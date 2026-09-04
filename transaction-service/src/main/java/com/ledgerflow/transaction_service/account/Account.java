@@ -62,11 +62,18 @@ public class Account {
         return status;
     }
 
+    public void settleReserved(BigDecimal amount) {
+        this.reservedBalance = this.reservedBalance.subtract(amount);
+    }
+
+    public void credit(BigDecimal amount) {
+        this.availableBalance = this.availableBalance.add(amount);
+    }
+
     public void reserve(BigDecimal amount) {
         this.availableBalance = this.availableBalance.subtract(amount);
         this.reservedBalance = this.reservedBalance.add(amount);
     }
-
     public boolean hasSufficientAvailableBalance(BigDecimal amount) {
         return availableBalance.compareTo(amount) >= 0;
     }

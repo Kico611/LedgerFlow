@@ -1,4 +1,4 @@
-package com.ledgerflow.transaction_service.config;
+package com.ledgerflow.ledger_service.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
@@ -9,9 +9,9 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicConfig {
 
     @Bean
-    public NewTopic transferEventsTopic() {
+    public NewTopic ledgerEventsTopic() {
         return TopicBuilder
-                .name("ledgerflow.transfer-events")
+                .name("ledgerflow.ledger-events")
                 .partitions(3)
                 .replicas(1)
                 .build();
