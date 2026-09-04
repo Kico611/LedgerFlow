@@ -23,6 +23,8 @@ public class OutboxEvent {
 
     @Column(nullable = false)
     private Instant createdAt;
+    @Column
+    private Instant publishedAt;
 
     public OutboxEvent() {
     }
@@ -59,5 +61,11 @@ public class OutboxEvent {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+    public Instant getPublishedAt() {
+        return publishedAt;
+    }
+    public void markPublished() {
+        this.publishedAt = Instant.now();
     }
 }

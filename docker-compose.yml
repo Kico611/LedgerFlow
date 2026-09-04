@@ -14,5 +14,28 @@ services:
     volumes:
       - transaction-db-data:/var/lib/postgresql/data
 
+  ledger-db:
+    image: postgres:16
+    container_name: ledgerflow-ledger-db
+
+    environment:
+      POSTGRES_DB: ledgerflow_ledger
+      POSTGRES_USER: ledgerflow
+      POSTGRES_PASSWORD: ledgerflow
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - ledger-db-data:/var/lib/postgresql/data
+
+  kafka:
+    image: apache/kafka:4.3.1
+    container_name: ledgerflow-kafka
+
+    ports:
+      - "9092:9092"
+
 volumes:
   transaction-db-data:
+  ledger-db-data:

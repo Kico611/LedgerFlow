@@ -10,8 +10,10 @@ import org.springframework.context.annotation.Bean;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class TransactionServiceApplication {
 
 	public static void main(String[] args) {
