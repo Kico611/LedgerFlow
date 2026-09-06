@@ -77,4 +77,7 @@ public class Reservation {
     public void markSettled() {
         this.status = ReservationStatus.SETTLED;
     }
+    public void markReleased() {
+        this.status = ReservationStatus.RELEASED;
+    }
 }

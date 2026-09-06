@@ -16,4 +16,13 @@ public class KafkaTopicConfig {
                 .replicas(1)
                 .build();
     }
+
+    @Bean
+    public NewTopic ledgerEventsDltTopic() {
+        return TopicBuilder
+                .name("ledgerflow.ledger-events.DLT")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
 }

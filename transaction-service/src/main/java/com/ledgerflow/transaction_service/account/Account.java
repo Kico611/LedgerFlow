@@ -74,6 +74,10 @@ public class Account {
         this.availableBalance = this.availableBalance.subtract(amount);
         this.reservedBalance = this.reservedBalance.add(amount);
     }
+    public void releaseReserved(BigDecimal amount) {
+        reservedBalance = reservedBalance.subtract(amount);
+        availableBalance = availableBalance.add(amount);
+    }
     public boolean hasSufficientAvailableBalance(BigDecimal amount) {
         return availableBalance.compareTo(amount) >= 0;
     }

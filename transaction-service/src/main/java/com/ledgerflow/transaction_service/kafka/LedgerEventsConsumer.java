@@ -1,13 +1,17 @@
 package com.ledgerflow.transaction_service.kafka;
 
 import com.ledgerflow.transaction_service.transfer.TransferService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class LedgerEventsConsumer {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(LedgerEventsConsumer.class);
 
     private final ObjectMapper objectMapper;
     private final TransferService transferService;
@@ -24,11 +28,67 @@ public class LedgerEventsConsumer {
             topics = "ledgerflow.ledger-events",
             groupId = "transaction-service"
     )
-    public void consume(String payload) throws JacksonException {
+    public void consume(String message) {
 
-        LedgerPostedEvent event =
-                objectMapper.readValue(payload, LedgerPostedEvent.class);
+        try {
+            LedgerEventEnvelope envelope =
+                    objectMapper.readValue(
+                            message,
+                            LedgerEventEnvelope.class
+                    );
 
-        transferService.settleTransfer(event.transferId());
+            if (envelope.eventType() == null) {
+                throw new IllegalArgumentException(
+                        "Ledger event is missing eventType"
+                );
+            }
+
+            switch (envelope.eventType()) {
+
+                case "LEDGER_POSTED" -> {
+
+                    LedgerPostedEvent event =
+                            objectMapper.readValue(
+                                    envelope.payload(),
+                                    LedgerPostedEvent.class
+                            );
+
+                    transferService.settleTransfer(
+                            event.transferId()
+                    );
+                }
+
+                case "LEDGER_FAILED" -> {
+
+                    LedgerFailedEvent event =
+                            objectMapper.readValue(
+                                    envelope.payload(),
+                                    LedgerFailedEvent.class
+                            );
+
+                    transferService.reverseTransfer(
+                            event.transferId()
+                    );
+                }
+
+                default -> throw new IllegalArgumentException(
+                        "Unknown ledger event type: "
+                                + envelope.eventType()
+                );
+            }
+
+        } catch (Exception e) {
+
+            log.error(
+                    "Failed to process ledger event: {}",
+                    message,
+                    e
+            );
+
+            throw new RuntimeException(
+                    "Failed to process ledger event",
+                    e
+            );
+        }
     }
 }

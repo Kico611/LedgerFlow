@@ -141,8 +141,11 @@ public class TransferService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("Transfer not found"));
 
-        if (transfer.getStatus() == TransferStatus.SETTLED) {
-            return;
+        if (transfer.getStatus() != TransferStatus.FUNDS_RESERVED) {
+            throw new IllegalStateException(
+                    "Transfer cannot be settled from status: "
+                            + transfer.getStatus()
+            );
         }
 
         Reservation reservation = reservationRepository
@@ -171,4 +174,44 @@ public class TransferService {
         reservationRepository.save(reservation);
         transferRepository.save(transfer);
     }
+
+    @Transactional
+    public void reverseTransfer(UUID transferId) {
+
+        Transfer transfer = transferRepository
+                .findById(transferId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Transfer not found"));
+
+        if (transfer.getStatus() == TransferStatus.REVERSED) {
+            return;
+        }
+
+        if (transfer.getStatus() != TransferStatus.FUNDS_RESERVED) {
+            throw new IllegalStateException(
+                    "Transfer cannot be reversed from status: "
+                            + transfer.getStatus()
+            );
+        }
+
+        Reservation reservation = reservationRepository
+                .findByTransferId(transferId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Reservation not found"));
+
+        Account sourceAccount = accountRepository
+                .findByIdForUpdate(transfer.getSourceAccount().getId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Source account not found"));
+
+        sourceAccount.releaseReserved(reservation.getAmount());
+
+        reservation.markReleased();
+
+        transfer.setStatus(TransferStatus.REVERSED);
+
+        reservationRepository.save(reservation);
+        transferRepository.save(transfer);
+    }
+
 }
