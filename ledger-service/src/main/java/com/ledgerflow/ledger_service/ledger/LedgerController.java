@@ -1,6 +1,10 @@
 package com.ledgerflow.ledger_service.ledger;
 
-import org.springframework.web.bind.annotation.*;
+import com.ledgerflow.ledger_service.ledger.dto.LedgerEntryResponse;
+import com.ledgerflow.ledger_service.ledger.dto.LedgerTransactionResponse;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -8,24 +12,19 @@ import java.util.List;
 @RequestMapping("/ledger")
 public class LedgerController {
 
-    private final LedgerTransactionRepository ledgerTransactionRepository;
-    private final LedgerEntryRepository ledgerEntryRepository;
+    private final LedgerService ledgerService;
 
-    public LedgerController(
-            LedgerTransactionRepository ledgerTransactionRepository,
-            LedgerEntryRepository ledgerEntryRepository
-    ) {
-        this.ledgerTransactionRepository = ledgerTransactionRepository;
-        this.ledgerEntryRepository = ledgerEntryRepository;
+    public LedgerController(LedgerService ledgerService) {
+        this.ledgerService = ledgerService;
     }
 
     @GetMapping("/transactions")
-    public List<LedgerTransaction> getTransactions() {
-        return ledgerTransactionRepository.findAll();
+    public List<LedgerTransactionResponse> getTransactions() {
+        return ledgerService.getTransactions();
     }
 
     @GetMapping("/entries")
-    public List<LedgerEntry> getEntries() {
-        return ledgerEntryRepository.findAll();
+    public List<LedgerEntryResponse> getEntries() {
+        return ledgerService.getEntries();
     }
 }

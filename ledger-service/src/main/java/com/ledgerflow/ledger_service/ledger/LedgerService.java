@@ -8,6 +8,10 @@ import java.time.Instant;
 import java.util.UUID;
 import com.ledgerflow.ledger_service.outbox.OutboxEvent;
 import com.ledgerflow.ledger_service.outbox.OutboxEventRepository;
+import com.ledgerflow.ledger_service.ledger.dto.LedgerEntryResponse;
+import com.ledgerflow.ledger_service.ledger.dto.LedgerTransactionResponse;
+
+import java.util.List;
 
 @Service
 public class LedgerService {
@@ -92,5 +96,32 @@ public class LedgerService {
         );
 
         outboxEventRepository.save(outboxEvent);
+    }
+    @Transactional(readOnly = true)
+    public List<LedgerTransactionResponse> getTransactions() {
+        return ledgerTransactionRepository.findAll()
+                .stream()
+                .map(transaction -> new LedgerTransactionResponse(
+                        transaction.getId(),
+                        transaction.getTransferId(),
+                        transaction.getStatus().name(),
+                        transaction.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LedgerEntryResponse> getEntries() {
+        return ledgerEntryRepository.findAll()
+                .stream()
+                .map(entry -> new LedgerEntryResponse(
+                        entry.getId(),
+                        entry.getLedgerTransaction().getId(),
+                        entry.getAccountId(),
+                        entry.getType().name(),
+                        entry.getAmount(),
+                        entry.getCurrency()
+                ))
+                .toList();
     }
 }

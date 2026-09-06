@@ -2,7 +2,7 @@ package com.ledgerflow.transaction_service.transfer;
 
 import com.ledgerflow.transaction_service.account.Account;
 import com.ledgerflow.transaction_service.account.AccountRepository;
-import com.ledgerflow.transaction_service.transfer.dto.CreateTransferRequest;
+import com.ledgerflow.transaction_service.dto.CreateTransferRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ledgerflow.transaction_service.account.AccountStatus;
@@ -13,6 +13,7 @@ import com.ledgerflow.transaction_service.outbox.OutboxEvent;
 import com.ledgerflow.transaction_service.outbox.OutboxEventRepository;
 import java.time.Instant;
 import java.util.UUID;
+import com.ledgerflow.transaction_service.dto.TransferResponse;
 
 @Service
 public class TransferService {
@@ -35,7 +36,7 @@ public class TransferService {
     }
 
     @Transactional
-    public Transfer createTransfer(CreateTransferRequest request) {
+    public TransferResponse createTransfer(CreateTransferRequest request) {
 
         Account sourceAccount = accountRepository
                 .findByIdForUpdate(request.sourceAccountId())
@@ -130,7 +131,14 @@ public class TransferService {
 
         outboxEventRepository.save(outboxEvent);
 
-        return transfer;
+        return new TransferResponse(
+                transfer.getId(),
+                sourceAccount.getId(),
+                destinationAccount.getId(),
+                transfer.getAmount(),
+                transfer.getCurrency(),
+                transfer.getStatus().name()
+        );
     }
 
     @Transactional
@@ -212,6 +220,24 @@ public class TransferService {
 
         reservationRepository.save(reservation);
         transferRepository.save(transfer);
+    }
+
+    @Transactional(readOnly = true)
+    public TransferResponse getTransferById(UUID transferId) {
+
+        Transfer transfer = transferRepository
+                .findById(transferId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Transfer not found"));
+
+        return new TransferResponse(
+                transfer.getId(),
+                transfer.getSourceAccount().getId(),
+                transfer.getDestinationAccount().getId(),
+                transfer.getAmount(),
+                transfer.getCurrency(),
+                transfer.getStatus().name()
+        );
     }
 
 }

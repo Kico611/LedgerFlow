@@ -1,4 +1,4 @@
-package com.ledgerflow.transaction_service.transfer.dto;
+package com.ledgerflow.transaction_service.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
